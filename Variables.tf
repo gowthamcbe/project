@@ -41,23 +41,14 @@ variable "vpc_cidr_block" {
 
 #Public_subnet_CIDR
 
-variable "pub-sub1_cidr_block" {
+variable "pub-sub_cidr_block" {
   description = "public subnet1 CIDR block for the VPC"
   type        = string
-  default     = "172.31.1.0/20" 
+  default     = ["172.31.1.0/20", "172.31.2.0/20"]
 }
-
-
-variable "pub-sub2_cidr_block" {
-  description = "public subnet2 CIDR block for the VPC"
-  type        = string
-  default     = "172.31.2.0/20" 
-}
-#Pvt_subnet_CIDR
 
 variable "pvt-sub1_cidr_block" {
   description = "private sub1 CIDR block for the VPC"
   type        = string
   default     = "172.31.100.0/20" 
 }
-
