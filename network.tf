@@ -1,24 +1,24 @@
 #vpc 
 
 locals {
-    company_name = "${var.company}"
-    vpc_name = "vpc-${var.company_name}"
-    subnet_pub = "subnet-pub-${var.company_name}"
-    subnet_pvt = "subnet-pvt-${var.company_name}"
-    igw = "IGW-${var.company_name}"
-    route_table_pub = "rt_pub-${var.company_name}"
-    route_table_pvt = "rt_pvt-${var.company_name}"
+  company_name    = var.company_name
+  vpc_name        = "${var.company_name}-vpc"
+  subnet_pub      = "${var.company_name}-subnet-pub"
+  subnet_pvt      = "${var.company_name}-subnet-pvt"
+  igw             = "${var.company_name}-IGW"
+  route_table_pub = "${var.company_name}-rt_pub"
+  route_table_pvt = "${var.company_name}-rt_pvt"
 }
 
 
 resource "aws_vpc" "vpc" {
-  cidr_block       = var.vpc_cidr_block
-  instance_tenancy = "default"
+  cidr_block           = var.vpc_cidr_block
+  instance_tenancy     = "default"
   enable_dns_hostnames = "true"
- 
+
   tags = {
-    Name = local.vpc_name
-    company_name = locals.company_name
+    Name         = local.vpc_name
+    company_name = local.company_name
 
   }
 }
@@ -26,25 +26,25 @@ resource "aws_vpc" "vpc" {
 #pub subnets
 
 resource "aws_subnet" "pub_sub1" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = var.pub-sub_cidr_block[1]
-  availability_zone = var.availability_zones[1]
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.pub_sub_cidr_block[0]
+  availability_zone       = var.availability_zones[0]
   map_public_ip_on_launch = "true"
 
   tags = {
-    Name = "subpub1"
+    Name        = "subpub1"
     subnet_name = local.subnet_pub
-}
+  }
 
 }
 resource "aws_subnet" "pub_sub2" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = var.pub-sub_cidr_block[2]
-  availability_zone = var.availability_zones[2]
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.pub_sub_cidr_block[1]
+  availability_zone       = var.availability_zones[1]
   map_public_ip_on_launch = "true"
 
   tags = {
-    Name = "subpub2"
+    Name        = "subpub2"
     subnet_name = local.subnet_pub
   }
 }
@@ -55,21 +55,21 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = locals.igw
+    Name = local.igw
   }
 }
 
 #public_route_table1
 resource "aws_route_table" "pub_rt1" {
-  vpc_id = aws_vpc.VPC.id
+  vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-   tags = {
-    Name = "Rt-Pub1"
-    route_name = locals.route_table_pub
+  tags = {
+    Name       = "Rt-Pub1"
+    route_name = local.route_table_pub
   }
 }
 
@@ -82,17 +82,17 @@ resource "aws_route_table_association" "pub_rt_ass1" {
 
 #public_route_table2
 
-resource "aws_route_table" "pub_rt_2" {
+resource "aws_route_table" "pub_rt2" {
   vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-   tags = {
-    Name = "Rt-Pub1"
+  tags = {
+    Name       = "Rt-Pub1"
     route_name = local.route_table_pub
-}
+  }
 
 }
 #public_route_table association2
@@ -106,12 +106,12 @@ resource "aws_route_table_association" "pub_rt_ass2" {
 #pvt subnets1
 
 resource "aws_subnet" "pvt_sub1" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = var.pub-sub1_cidr_block
-  availability_zone = var.availability_zones[3]
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.pvt_sub1_cidr_block
+  availability_zone       = var.availability_zones[2]
   map_public_ip_on_launch = "false"
-   tags = {
-    Name = "subpvt1"
+  tags = {
+    Name        = "subpvt1"
     subnet_name = local.subnet_pvt
   }
 }
@@ -119,14 +119,14 @@ resource "aws_subnet" "pvt_sub1" {
 #pvt route_table1
 
 resource "aws_route_table" "pvt_rt1" {
-  vpc_id = aws_vpc.VPC.id
+  vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.nat.id
   }
   tags = {
-    Name = "Rt-Pub1"
+    Name       = "Rt-Pub1"
     route_name = local.route_table_pub
   }
 }
@@ -162,7 +162,7 @@ resource "aws_security_group" "sg" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  
+
   egress {
     from_port        = 0
     to_port          = 0
@@ -172,12 +172,12 @@ resource "aws_security_group" "sg" {
   }
 
   tags = {
-    Name = locals.project-name
+    Name = local.company_name
   }
 }
 
 #Eip 
-resource "aws_eip" "eip"{
+resource "aws_eip" "eip" {
   vpc = true
 }
 
@@ -188,6 +188,6 @@ resource "aws_nat_gateway" "nat" {
   subnet_id     = aws_subnet.pvt_sub1.id
 
   tags = {
-    Name = locals.company_name
+    Name = local.company_name
   }
 }
