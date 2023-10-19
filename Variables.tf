@@ -22,33 +22,29 @@ variable "availability_zones" {
 variable "company_name" {
   description = "company name"
   type        = string
-  default     = "thara_data"
 }
 
 # tags
 
-variable "tharav_data" {
-  description = "Tags that will be applied to the aws resource"
-}
 
 #vpc_CIDR_block
 
 variable "vpc_cidr_block" {
   description = "CIDR block for the VPC"
   type        = string
-  default     = "172.31.0.0/16" 
+  default     = "172.31.0.0/16"
 }
 
 #Public_subnet_CIDR
 
-variable "pub-sub_cidr_block" {
+variable "pub_sub_cidr_block" {
   description = "public subnet1 CIDR block for the VPC"
-  type        = string
-  default     = ["172.31.1.0/20", "172.31.2.0/20"]
+  type        = list(string)
+  default     = ["172.31.0.0/20", "172.31.16.0/20"]
 }
 
-variable "pvt-sub1_cidr_block" {
+variable "pvt_sub1_cidr_block" {
   description = "private sub1 CIDR block for the VPC"
   type        = string
-  default     = "172.31.100.0/20" 
+  default     = "172.31.32.0/20"
 }
