@@ -32,8 +32,7 @@ resource "aws_subnet" "pub_sub1" {
   map_public_ip_on_launch = "true"
 
   tags = {
-    Name        = "subpub1"
-    subnet_name = local.subnet_pub
+    Name        = "${local.subnet_pub}-1"
   }
 
 }
@@ -44,8 +43,7 @@ resource "aws_subnet" "pub_sub2" {
   map_public_ip_on_launch = "true"
 
   tags = {
-    Name        = "subpub2"
-    subnet_name = local.subnet_pub
+    Name        = "${local.subnet_pub}-2"   
   }
 }
 
@@ -68,8 +66,7 @@ resource "aws_route_table" "pub_rt1" {
     gateway_id = aws_internet_gateway.igw.id
   }
   tags = {
-    Name       = "Rt-Pub1"
-    route_name = local.route_table_pub
+    Name       = "${local.route_table_pub}-1"
   }
 }
 
@@ -90,8 +87,7 @@ resource "aws_route_table" "pub_rt2" {
     gateway_id = aws_internet_gateway.igw.id
   }
   tags = {
-    Name       = "Rt-Pub1"
-    route_name = local.route_table_pub
+    Name       = "${local.route_table_pub}-2"
   }
 
 }
@@ -111,8 +107,7 @@ resource "aws_subnet" "pvt_sub1" {
   availability_zone       = var.availability_zones[2]
   map_public_ip_on_launch = "false"
   tags = {
-    Name        = "subpvt1"
-    subnet_name = local.subnet_pvt
+    Name        = "${local.subnet_pvt}-1"
   }
 }
 
@@ -126,8 +121,7 @@ resource "aws_route_table" "pvt_rt1" {
     gateway_id = aws_nat_gateway.nat.id
   }
   tags = {
-    Name       = "Rt-Pub1"
-    route_name = local.route_table_pub
+    Name       = "${local.route_table_pvt}-1"
   }
 }
 #Pvt_route_table association1
@@ -139,7 +133,7 @@ resource "aws_route_table_association" "pvt_rt_ass1" {
 
 #security group
 
-resource "aws_security_group" "sg" {
+resource "aws_security_group" "sg-pub" {
   name        = "Security Group"
   description = "Allow TLS inbound traffic"
   vpc_id      = aws_vpc.vpc.id
@@ -172,7 +166,51 @@ resource "aws_security_group" "sg" {
   }
 
   tags = {
-    Name = local.company_name
+    Name = "${local.company_name}-SG-PUB"
+  }
+}
+
+#Security Group Pvt
+
+resource "aws_security_group" "sg-pvt" {
+  name        = "Security Group"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = aws_vpc.vpc.id
+
+  ingress {
+    description      = "HTTPS"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    security_groups = [aws_security_group.sg-pub.id]
+  }
+
+  ingress {
+    description      = "SSH"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    security_groups = [aws_security_group.sg-pub.id]
+  }
+  ingress {
+    description      = "HTTP"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    security_groups = [aws_security_group.sg-pub.id]
+  }
+
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "${local.company_name}-SG-PVT"
   }
 }
 
@@ -188,6 +226,6 @@ resource "aws_nat_gateway" "nat" {
   subnet_id     = aws_subnet.pvt_sub1.id
 
   tags = {
-    Name = local.company_name
+    Name = "${local.company_name}-NATG"
   }
 }
